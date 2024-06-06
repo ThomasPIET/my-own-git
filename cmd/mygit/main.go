@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Logs from your program will appear here!")
 
 	if len(os.Args) < 2 {
 		_, err := fmt.Fprintf(os.Stderr, "usage: mygit <command> [<args>...]\n")
