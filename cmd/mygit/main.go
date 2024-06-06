@@ -1,13 +1,14 @@
 package main
 
 import (
+	"compress/zlib"
 	"fmt"
+	"io"
+	"log"
 	"os"
-	// Uncomment this block to pass the first stage!
-	// "os"
+	"strings"
 )
 
-// Usage: your_git.sh <command> <arg1> <arg2> ...
 func main() {
 	fmt.Println("Logs from your program will appear here!")
 
@@ -31,8 +32,34 @@ func main() {
 
 		fmt.Println("Initialized git directory")
 
+	case "cat-file":
+		if len(os.Args) < 3 {
+			log.Panic("something is missing")
+		}
+		catFile()
+
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
 	}
+}
+
+func catFile() {
+	blob_sha := os.Args[3]
+	path := fmt.Sprintf(".git/objects/%v/%v", blob_sha[0:2], blob_sha[2:])
+	file, err := os.Open(path)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer file.Close()
+	zlib_r, err := zlib.NewReader(file)
+	if err != nil {
+		log.Panic(err)
+	}
+	read_zlib, err := io.ReadAll(zlib_r)
+	if err != nil {
+		log.Panic(err)
+	}
+	parts := strings.Split(string(read_zlib), "\x00")
+	fmt.Print(parts[1])
 }
